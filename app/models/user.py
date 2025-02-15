@@ -25,4 +25,4 @@ class User(BaseModel):
 	role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="role_enum"), nullable=True, default=UserRole.USER)
 	birth_date: Mapped[datetime] = mapped_column(Date, nullable=True)
 
-	submissions = relationship("Submission", back_populates="user")
+	# submissions = relationship("Submission", back_populates="user")
