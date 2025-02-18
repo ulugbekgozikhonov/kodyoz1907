@@ -1,17 +1,16 @@
 import uuid
 
-from pydantic import BaseModel
 from sqlalchemy import Text, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base import BaseModel
 
 
 class TestCase(BaseModel):
-	__tablename__ = 'test_cases'
+	__tablename__ = "test_cases"
 
-	input: Mapped[str] = mapped_column(Text, nullable=False)
-	output: Mapped[str] = mapped_column(Text, nullable=False)
-	explanation: Mapped[str] = mapped_column(Text, nullable=True)
-	problem_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey('problems.id'), nullable=False)
+	problem_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("problems.id"), nullable=False)
+	input_data: Mapped[str] = mapped_column(Text, nullable=False)
+	expected_output: Mapped[str] = mapped_column(Text, nullable=False)
 
-	problem = relationship("Problems", back_populates="test_cases")
+	problem = relationship("Problem", back_populates="test_cases")

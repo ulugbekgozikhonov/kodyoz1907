@@ -1,28 +1,24 @@
 import enum
-from datetime import datetime
+from datetime import date
 
-from sqlalchemy import String, Date, Enum, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, Enum, Date
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import BaseModel
 
 
-class UserRole(enum.Enum):
-	ADMIN = "admin"
-	USER = "user"
+class GenderType(enum.Enum):
+	MALE = 'male'
+	FEMALE = 'female'
 
 
 class User(BaseModel):
 	__tablename__ = 'users'
-
-	username: Mapped[str] = mapped_column(String, nullable=False, index=True, unique=True)
-	firstname: Mapped[str] = mapped_column(String, nullable=False)
-	lastname: Mapped[str] = mapped_column(String, nullable=False)
-	email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-	password: Mapped[str] = mapped_column(String, nullable=False)
-	gender: Mapped[str] = mapped_column(String, nullable=True)
-	is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-	role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="role_enum"), nullable=True, default=UserRole.USER)
-	birth_date: Mapped[datetime] = mapped_column(Date, nullable=True)
-
-	# submissions = relationship("Submission", back_populates="user")
+	username: Mapped[str] = mapped_column(String(length=33), unique=True, nullable=False)
+	firstname: Mapped[str] = mapped_column(String(length=50), nullable=False)
+	lastname: Mapped[str] = mapped_column(String(length=50))
+	photo_url: Mapped[str] = mapped_column(String(length=255))
+	email: Mapped[str] = mapped_column(String(length=125), unique=True, nullable=False)
+	password: Mapped[str] = mapped_column(String(length=255), nullable=False)
+	gender: Mapped[GenderType] = mapped_column(Enum(GenderType, name="gender_enum"))
+	birth_date: Mapped[date] = mapped_column(Date)
