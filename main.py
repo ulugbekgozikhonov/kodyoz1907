@@ -10,3 +10,10 @@ async def root():
 
 
 # print("Nuriddin")
+
+
+
+
+
+
+# salom
