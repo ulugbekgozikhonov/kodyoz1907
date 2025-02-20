@@ -1,8 +1,12 @@
 import os
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated
+from fastapi import Depends
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:root_123@localhost:5432/kodyoz1907")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
@@ -15,3 +19,6 @@ async def get_db():
 	"""FastAPI uchun asinxron sessiya generatori."""
 	async with async_session_maker() as session:
 		yield session
+
+
+dependency = Annotated[AsyncSession, Depends(get_db)]
