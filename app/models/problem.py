@@ -18,7 +18,7 @@ class Problem(BaseModel):
 	__tablename__ = 'problems'
 	title: Mapped[str] = mapped_column(String(length=255), nullable=False)
 	description: Mapped[str] = mapped_column(Text, nullable=False)
-	hint: Mapped[str] = mapped_column(String(length=255))
+	hint: Mapped[str] = mapped_column(String(length=255), nullable=True)
 	difficulty: Mapped[str] = mapped_column(Enum(Difficulty, name="difficulty_enum"), nullable=False)
 
 	test_cases = relationship("TestCase", back_populates="problem", cascade="all, delete-orphan")
