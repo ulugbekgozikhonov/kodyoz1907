@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.routers.views import router as user_router
 
 
-@app.get("/test")
-async def root():
-	return {"message": "Hello World"}
+app = FastAPI(title="KodYoz API", description="KodYoz api", version="1.0.0")
 
 
-# qwertyuiop1234567890
+app.include_router(user_router, prefix="/user", tags=["user"])
