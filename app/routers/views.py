@@ -120,8 +120,8 @@ async def register(user_req: UserRegister, db: AsyncSession = Depends(dependency
     )
 
     db.add(user)
-    await db.commit()  # Асинхронный коммит
-    await db.refresh(user)  # Обновление объекта в сессии
+    await db.commit() 
+    await db.refresh(user) 
 
     access_token = create_access_token(data={"sub": user.name}, expires_delta=timedelta(minutes=30))
 
