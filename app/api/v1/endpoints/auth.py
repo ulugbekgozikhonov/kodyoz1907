@@ -5,13 +5,16 @@ from fastapi import APIRouter, HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy import exists
 from sqlalchemy.future import select
+from app.core.config import settings
 
 from app.core.dependencies import db_dependency
 from app.models import User, UserVerificationCode
-from app.schemas.auth import UserCreate
+from app.schemas.auth import UserCreate, UserLogin, UserLogin_Code
 from app.utils.email import send_verification_email
+from app.utils.create_token import create_access_token
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter()
 
@@ -58,8 +61,68 @@ async def signup(user_create: UserCreate, db: db_dependency):
 	await db.commit()
 	await db.refresh(user_verify)
 
-	# await send_verification_email(user.email, user_verify.code)
+	await send_verification_email(user.email, user_verify.code)
 	return {
 		"success": True,
 		"message": f"{user.email} send code {user_verify.code}",
+	}
+
+@router.post("/login")
+async def login(user_login: UserLogin, db: db_dependency):
+    query = select(User).where(User.username == user_login.username) 
+    result = await db.execute(query)
+    user = result.scalars().first()
+
+    if not user or not pwd_context.verify(user_login.password, user.password):
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    return {"message": "Login successful", "token": access_token}
+
+
+@router.post("/login_email_code")
+async def login_email_code(user_login: UserLogin_Code, db: db_dependency):
+    query = select(User).where(User.username == user_login.username)
+    result = await db.execute(query)
+    user = result.scalars().first()
+
+    if not user or not pwd_context.verify(user_login.password, user.password):
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    query = select(UserVerificationCode).where(
+        UserVerificationCode.user_id == user.id
+    ).order_by(UserVerificationCode.expires_at.desc())
+
+    result = await db.execute(query)
+    verification_code = result.scalars().first()
+
+    if not verification_code:
+        raise HTTPException(status_code=400, detail="Verification code not found")
+
+    if not user_login.code:
+        raise HTTPException(status_code=400, detail="Verification code is required")
+
+    if verification_code.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Verification code expired")
+
+    if verification_code.code != user_login.code:
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+	# if not verification_code or not user_login.code or verification_code.expires_at < datetime.utcnow() or verification_code.code != user_login.code:
+    #     raise HTTPException(status_code=400, detail="Invalid, missing, or expired verification code")
+
+    await db.delete(verification_code)
+    await db.commit()
+
+    access_token = create_access_token(
+        data={"sub": user.username}, 
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    return {
+        "message": "Login successful",
+        "token": access_token
 	}

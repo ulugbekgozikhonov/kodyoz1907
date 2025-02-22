@@ -15,6 +15,8 @@ class GenderType(enum.Enum):
 class User(BaseModel):
 	__tablename__ = 'users'
 	username: Mapped[str] = mapped_column(String(length=33), unique=True, nullable=False)
+	firstname: Mapped[str] = mapped_column(String(length=50), nullable=False)
+	lastname: Mapped[str] = mapped_column(String(length=50))
 	firstname: Mapped[str] = mapped_column(String(length=50), nullable=True)
 	lastname: Mapped[str] = mapped_column(String(length=50), nullable=True)
 	photo_url: Mapped[str] = mapped_column(String(length=255), nullable=True)
