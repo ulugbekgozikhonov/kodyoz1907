@@ -1,5 +1,4 @@
 import enum
-from typing import List
 
 from sqlalchemy import String, Text, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,7 +22,7 @@ class Problem(BaseModel):
 
 	test_cases = relationship("TestCase", back_populates="problem", cascade="all, delete-orphan")
 	submissions = relationship("Submission", back_populates="problem")
-	tags: Mapped[List["Tag"]] = relationship(
+	tags: Mapped[list["Tag"]] = relationship(
 		secondary=problem_tag_association,
 		back_populates="problems",
 		lazy="selectin",
